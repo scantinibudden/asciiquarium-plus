@@ -1,5 +1,10 @@
 Changes for Asciiquarium
 
+asciiquarium-plus 1.2.0 2026-09-29
+	- Optional config file (~/.config/asciiquarium-plus/config) for the
+	  default decoration and cooldown; anything invalid falls back to the
+	  built-in defaults
+
 asciiquarium-plus 1.1.0 2026-09-29
 	- Each scene opens with a random event instead of always the shark
 

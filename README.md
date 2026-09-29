@@ -92,6 +92,23 @@ While it runs:
 
 A new scene opens with a random event right away; the cooldown applies between events after that.
 
+## Configuration
+
+To change the defaults without typing flags every time, create `~/.config/asciiquarium-plus/config` (or `$XDG_CONFIG_HOME/asciiquarium-plus/config`):
+
+```ini
+# asciiquarium-plus
+decoration = skull   # random, anchor, castle, skull or treasure
+cooldown = 60        # seconds between events
+```
+
+Flags override the file, and the file overrides the built-in defaults (`random`, `30`). The file is only ever read, never written, and it can't break anything:
+
+- a missing, empty or unreadable file means the defaults
+- an empty or unknown `decoration` means `random`
+- a `cooldown` that isn't a whole number means `30`
+- unknown keys and junk lines are ignored
+
 ## Install
 
 The script needs Perl 5 with the [Curses](https://metacpan.org/pod/Curses) and [Term::Animation](https://metacpan.org/pod/Term::Animation) modules. It runs anywhere curses does (Linux, macOS, BSD, WSL), but not natively on Windows.
@@ -119,7 +136,7 @@ cd asciiquarium-plus && sudo make install   # installs to /usr/local/bin/asciiqu
 ## Development
 
 ```sh
-make test   # prove t/: compiles, CLI validation, art/colour-mask alignment, event order
+make test   # prove t/: compiles, CLI validation, config fallbacks, art/colour-mask alignment, event order
 make lint   # perlcritic (gentle, see .perlcriticrc)
 ```
 

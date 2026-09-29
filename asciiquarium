@@ -50,7 +50,7 @@ use Getopt::Std;
 use strict;
 use warnings;
 
-my $version = "plus-1.1.0";
+my $version = "plus-1.2.0";
 
 my %opts;
 my %decorations = (
@@ -61,13 +61,23 @@ my %decorations = (
 );
 # everything but the castle has sunk here; random (the default) picks one per scene
 my @sunken = grep { $_ ne 'castle' } sort keys %decorations;
+
+# flags beat the config file, which beats these
+my %defaults = (
+	decoration	=> 'random',
+	cooldown	=> 30,
+);
+my $config_file = ($ENV{'XDG_CONFIG_HOME'} || ($ENV{'HOME'} || '') . '/.config') . '/asciiquarium-plus/config';
+my %config = read_config($config_file);
+
 my $usage = "usage: $0 [-d random|" . join('|', sort keys %decorations) . "] [-e seconds]\n" .
-	"  -d  what sits on the sea floor (default random)\n" .
-	"  -e  cooldown between events (default 30)\n";
+	"  -d  what sits on the sea floor (default $defaults{'decoration'})\n" .
+	"  -e  cooldown between events (default $defaults{'cooldown'})\n" .
+	"defaults can be set in $config_file\n";
 getopts('d:e:', \%opts) or die $usage;
-my $decoration = defined($opts{'d'}) ? $opts{'d'} : 'random';
+my $decoration = defined($opts{'d'}) ? $opts{'d'} : $config{'decoration'};
 die $usage unless($decoration eq 'random' or exists($decorations{$decoration}));
-my $event_cooldown = defined($opts{'e'}) ? $opts{'e'} : 30;
+my $event_cooldown = defined($opts{'e'}) ? $opts{'e'} : $config{'cooldown'};
 die $usage unless($event_cooldown =~ /^\d+$/);
 my $next_event = 0;
 
@@ -97,7 +107,8 @@ my %depth = (
 	water_gap0	=> 9,
 );
 
-main();
+# tests load the script to call its subs without starting the animation
+main() unless(caller);
 
 ####################### MAIN #######################
 
@@ -1583,6 +1594,27 @@ sub random_object {
 		die_time	=> time() + $event_cooldown,
 		death_cb	=> sub { random_object(undef, $_[1]) },
 	);
+}
+
+# "key = value" lines; # starts a comment. the file is never written, and
+# anything missing, unreadable or nonsensical in it falls back to %defaults
+sub read_config {
+	my ($file) = @_;
+	my %config = %defaults;
+	return %config unless(-f $file and open(my $fh, '<', $file));
+	while(my $line = <$fh>) {
+		$line =~ s/#.*//;
+		next unless($line =~ /^\s*(\w+)\s*=\s*(.*?)\s*$/);
+		my ($key, $value) = (lc($1), lc($2));
+		if($key eq 'decoration') {
+			$config{'decoration'} = exists($decorations{$value}) ? $value : 'random';
+		}
+		elsif($key eq 'cooldown' and $value =~ /^\d+$/) {
+			$config{'cooldown'} = $value;
+		}
+	}
+	close($fh);
+	return %config;
 }
 
 sub dprint {
