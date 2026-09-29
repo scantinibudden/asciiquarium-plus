@@ -54,6 +54,7 @@ my %decorations = (
 	castle		=> \&add_castle,
 	treasure	=> \&add_treasure,
 	skull		=> \&add_skull,
+	anchor		=> \&add_anchor,
 );
 my $usage = "usage: $0 [-d " . join('|', sort keys %decorations) . "]\n";
 getopts('d:', \%opts) or die $usage;
@@ -283,6 +284,55 @@ sub add_skull {
 		shape		=> $skull_image,
 		color		=> $skull_mask,
 		position	=> [ $anim->width()-34, $anim->height()-15, $depth{'castle'} ],
+		default_color	=> 'white',
+	);
+}
+
+sub add_anchor {
+	my ($anim) = @_;
+	my $anchor_image = q{
+            .-~-.
+           /     \
+           \     /
+            `-.-'
+   (_)=-_=-_=|:|=_-=_-=(_)
+             |:|
+             |:|
+             |:|
+             |:|
+ __          |:|          __
+\  `.        |:|        .'  /
+ \   `.      |:|      .'   /
+  \    `.    |:|    .'    /
+   `.    `-._|:|_.-'    .'
+     `-.____.\:/.____.-'
+              V
+};
+
+	my $anchor_mask = q{
+
+
+
+
+      yyyyyyy K yyyyyyy
+              K
+              K
+              K
+              K
+              K
+              K
+              K
+              K
+              K
+              K
+
+};
+
+	$anim->new_entity(
+		name		=> "anchor",
+		shape		=> $anchor_image,
+		color		=> $anchor_mask,
+		position	=> [ $anim->width()-29, $anim->height()-16, $depth{'castle'} ],
 		default_color	=> 'white',
 	);
 }
