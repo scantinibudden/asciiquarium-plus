@@ -1,5 +1,8 @@
 Changes for Asciiquarium
 
+asciiquarium-plus 1.1.0 2026-09-29
+	- Each scene opens with a random event instead of always the shark
+
 asciiquarium-plus 1.0.0 2026-09-29
 	- Sunken decorations: treasure chest, skull and anchor (-d)
 	- A random sunken decoration is picked for every scene by default

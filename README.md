@@ -11,7 +11,7 @@ It is still a single Perl script, and the original is left alone apart from thes
 ## What's new
 
 - **Sunken decorations.** A treasure chest, a skull or an anchor sits where the castle used to. By default each scene picks one at random (a new one on every redraw), and `-d castle` brings the castle back.
-- **Events take turns.** The shark, fish hook, ship, dolphins, big fish, ducks, sea monster, swan and whale appear one at a time in that fixed order and loop forever. After each one leaves, the sea stays calm for a shared cooldown (`-e`, 30 seconds by default).
+- **Events take turns.** The shark, fish hook, ship, dolphins, big fish, ducks, sea monster, swan and whale appear one at a time in that fixed order and loop forever, starting from a random one. After each one leaves, the sea stays calm for a shared cooldown (`-e`, 30 seconds by default).
 
 ## The sea floor
 
@@ -90,7 +90,7 @@ While it runs:
 | `p` | pause / resume |
 | `r` | redraw (recreates everything and picks a new random decoration) |
 
-A new scene starts with an event right away; the cooldown applies between events after that.
+A new scene opens with a random event right away; the cooldown applies between events after that.
 
 ## Install
 

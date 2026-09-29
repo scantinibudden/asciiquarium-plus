@@ -50,7 +50,7 @@ use Getopt::Std;
 use strict;
 use warnings;
 
-my $version = "plus-1.0.0";
+my $version = "plus-1.1.0";
 
 my %opts;
 my %decorations = (
@@ -120,6 +120,7 @@ sub main {
 		$decorations{$name}->($anim);
 		add_all_seaweed($anim);
 		add_all_fish($anim);
+		$next_event = int(rand(@random_objects));	# each scene opens with a random event
 		random_object(undef, $anim);
 		
 		$anim->redraw_screen();
@@ -1565,7 +1566,7 @@ sub init_random_objects {
 	);
 }
 
-# events take turns in order. a new scene starts the next one right away;
+# events take turns in order. a new scene starts a random one right away;
 # when an event ends, the next one waits out the cooldown first
 sub random_object {
 	my ($dead_object, $anim) = @_;
