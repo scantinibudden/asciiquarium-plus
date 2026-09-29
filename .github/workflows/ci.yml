@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y libperl-critic-perl
+      - run: make lint
+
+  test-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y libcurses-perl cpanminus
+      - run: sudo cpanm --notest Term::Animation
+      - run: make test
+
+  test-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      # the Homebrew formula bundles Curses and Term::Animation
+      - run: brew install asciiquarium
+      - run: PERL5LIB="$(brew --prefix asciiquarium)/libexec/lib/perl5" make test
