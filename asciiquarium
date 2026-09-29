@@ -43,10 +43,14 @@ use Term::Animation 2.0;
 use Term::Animation::Entity;
 use Data::Dumper;
 use Curses;
+use Getopt::Std;
 use strict;
 use warnings;
 
 my $version = "1.1";
+
+my %opts;
+getopts('t', \%opts) or die "usage: $0 [-t]\n  -t  treasure chest instead of the castle\n";
 
 my @random_objects = init_random_objects();
 
@@ -93,7 +97,8 @@ sub main {
 	while(1) {
 
 		add_environment($anim);
-		add_castle($anim);
+		if($opts{'t'}) { add_treasure($anim); }
+		else           { add_castle($anim); }
 		add_all_seaweed($anim);
 		add_all_fish($anim);
 		random_object(undef, $anim);
@@ -188,6 +193,43 @@ sub add_castle {
 		color		=> $castle_mask,
 		position	=> [ $anim->width()-32, $anim->height()-13, $depth{'castle'} ],
 		default_color	=> 'BLACK',
+	);
+}
+
+sub add_treasure {
+	my ($anim) = @_;
+	my $treasure_image = q{
+       _.-~~~~~~~~~~~~~~~~~~~-._
+    .-' -_ =  | =  _-  =| _- =  '-.
+   /  = _-  _ |  -_ =  _| =  _ -   \
+  /_-_=____-__|___=_-___|__-__=__-__\
+  |[]=======[]|=.-----.=|[]=======[]|
+  | _-  = -_  | | (@) | |  -_ =  _- |
+  |=  _- =  _ | |  V  | | _ =  -_ = |
+  | -_ =  - _ | '-----' |  = _ -  _-|
+  |[]=======[]|=========|[]=======[]|
+  |_=_-___=_-_|__-_=____|_=-__-_=___|
+};
+
+	my $treasure_mask = q{
+
+
+
+
+   WWwwwwwwwWW wWWWWWWWw WWwwwwwwwWW
+                W WYW W
+                W  Y  W
+                WWWWWWW
+   WWwwwwwwwWW wwwwwwwww WWwwwwwwwWW
+
+};
+
+	$anim->new_entity(
+		name		=> "treasure",
+		shape		=> $treasure_image,
+		color		=> $treasure_mask,
+		position	=> [ $anim->width()-38, $anim->height()-10, $depth{'castle'} ],
+		default_color	=> 'yellow',
 	);
 }
 
