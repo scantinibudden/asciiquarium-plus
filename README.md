@@ -96,13 +96,13 @@ A new scene starts with an event right away; the cooldown applies between events
 
 The script needs Perl 5 with the [Curses](https://metacpan.org/pod/Curses) and [Term::Animation](https://metacpan.org/pod/Term::Animation) modules. It runs anywhere curses does (Linux, macOS, BSD, WSL), but not natively on Windows.
 
-**macOS (Homebrew).** The `asciiquarium` formula already bundles both modules:
+**macOS (Homebrew).** The `asciiquarium` formula already bundles both modules, built for the system Perl, so run the script with `/usr/bin/perl` (a Homebrew `perl` on your `PATH` can't load them):
 
 ```sh
 brew install asciiquarium
 git clone https://github.com/scantinibudden/asciiquarium-plus.git
 cd asciiquarium-plus
-PERL5LIB="$(brew --prefix asciiquarium)/libexec/lib/perl5" ./asciiquarium
+PERL5LIB="$(brew --prefix asciiquarium)/libexec/lib/perl5" /usr/bin/perl ./asciiquarium
 ```
 
 **Debian / Ubuntu**

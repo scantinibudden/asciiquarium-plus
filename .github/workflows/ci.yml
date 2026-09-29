@@ -25,6 +25,6 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
-      # the Homebrew formula bundles Curses and Term::Animation
+      # the Homebrew formula bundles Curses and Term::Animation, built for the system perl
       - run: brew install asciiquarium
-      - run: PERL5LIB="$(brew --prefix asciiquarium)/libexec/lib/perl5" make test
+      - run: PATH="/usr/bin:$PATH" PERL5LIB="$(brew --prefix asciiquarium)/libexec/lib/perl5" make test
