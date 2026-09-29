@@ -50,7 +50,15 @@ use warnings;
 my $version = "1.1";
 
 my %opts;
-getopts('t', \%opts) or die "usage: $0 [-t]\n  -t  treasure chest instead of the castle\n";
+my %decorations = (
+	castle		=> \&add_castle,
+	treasure	=> \&add_treasure,
+	skull		=> \&add_skull,
+);
+my $usage = "usage: $0 [-d " . join('|', sort keys %decorations) . "]\n";
+getopts('d:', \%opts) or die $usage;
+my $decoration = defined($opts{'d'}) ? $opts{'d'} : 'castle';
+die $usage unless(exists($decorations{$decoration}));
 
 my @random_objects = init_random_objects();
 
@@ -97,8 +105,7 @@ sub main {
 	while(1) {
 
 		add_environment($anim);
-		if($opts{'t'}) { add_treasure($anim); }
-		else           { add_castle($anim); }
+		$decorations{$decoration}->($anim);
 		add_all_seaweed($anim);
 		add_all_fish($anim);
 		random_object(undef, $anim);
@@ -230,6 +237,53 @@ sub add_treasure {
 		color		=> $treasure_mask,
 		position	=> [ $anim->width()-38, $anim->height()-10, $depth{'castle'} ],
 		default_color	=> 'yellow',
+	);
+}
+
+sub add_skull {
+	my ($anim) = @_;
+	my $skull_image = q{
+            _.--~~~~~--._
+        .-~' ,      _/   '~-.
+      .'  .        / \_      '.
+     /  ,         _/  \     .  \
+    |    .-~~~~~-. .-~~~~~-.    |
+    |   /::'    `\ /'    '::\   |
+    |  |:::      | |      :::|  |
+    |   \::.    .' '.    .::/   |
+     \  `-.__.-' /^\ '-.__.-'  /
+      `.        /: :\        .'
+        |`.    (__^__)    .'|
+        |  `-._________.-'  |
+        |   |_|_|_|_|_|_|   |
+         \  |_|_|_|_|_|_|  /
+          `-.___________.-'
+};
+
+	my $skull_mask = q{
+
+             K      KK
+          K        K KK
+        K         KK  K     K
+
+         KK               KK
+        KKK               KKK
+         KK               KK
+
+                 K K
+
+
+            WWWWWWWWWWWWW
+            WWWWWWWWWWWWW
+
+};
+
+	$anim->new_entity(
+		name		=> "skull",
+		shape		=> $skull_image,
+		color		=> $skull_mask,
+		position	=> [ $anim->width()-34, $anim->height()-15, $depth{'castle'} ],
+		default_color	=> 'white',
 	);
 }
 
