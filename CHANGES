@@ -1,5 +1,13 @@
 Changes for Asciiquarium
 
+asciiquarium-plus 1.0.0 2026-09-29
+	- Sunken decorations: treasure chest, skull and anchor (-d)
+	- A random sunken decoration is picked for every scene by default
+	- Events (shark, fish hook, ship, dolphins, big fish, ducks, sea
+	  monster, swan, whale) take turns in a fixed order with a shared
+	  cooldown between them (-e, default 30 seconds)
+	- Tests, Perl::Critic lint and CI
+
 Version 1.1 2013-03-09
 	- Automatically redraw when the terminal size changes
 	- Added fish hook, swan, ducks and dolphins
