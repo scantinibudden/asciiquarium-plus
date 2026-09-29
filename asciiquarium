@@ -56,13 +56,13 @@ my %decorations = (
 	skull		=> \&add_skull,
 	anchor		=> \&add_anchor,
 );
-# everything but the castle has sunk here; -d random picks one per scene
+# everything but the castle has sunk here; random (the default) picks one per scene
 my @sunken = grep { $_ ne 'castle' } sort keys %decorations;
 my $usage = "usage: $0 [-d random|" . join('|', sort keys %decorations) . "] [-e seconds]\n" .
-	"  -d  what sits on the sea floor (default castle)\n" .
+	"  -d  what sits on the sea floor (default random)\n" .
 	"  -e  cooldown between events (default 30)\n";
 getopts('d:e:', \%opts) or die $usage;
-my $decoration = defined($opts{'d'}) ? $opts{'d'} : 'castle';
+my $decoration = defined($opts{'d'}) ? $opts{'d'} : 'random';
 die $usage unless($decoration eq 'random' or exists($decorations{$decoration}));
 my $event_cooldown = defined($opts{'e'}) ? $opts{'e'} : 30;
 die $usage unless($event_cooldown =~ /^\d+$/);
