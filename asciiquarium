@@ -56,10 +56,17 @@ my %decorations = (
 	skull		=> \&add_skull,
 	anchor		=> \&add_anchor,
 );
-my $usage = "usage: $0 [-d " . join('|', sort keys %decorations) . "]\n";
-getopts('d:', \%opts) or die $usage;
+# everything but the castle has sunk here; -d random picks one per scene
+my @sunken = grep { $_ ne 'castle' } sort keys %decorations;
+my $usage = "usage: $0 [-d random|" . join('|', sort keys %decorations) . "] [-e seconds]\n" .
+	"  -d  what sits on the sea floor (default castle)\n" .
+	"  -e  cooldown between events (default 30)\n";
+getopts('d:e:', \%opts) or die $usage;
 my $decoration = defined($opts{'d'}) ? $opts{'d'} : 'castle';
-die $usage unless(exists($decorations{$decoration}));
+die $usage unless($decoration eq 'random' or exists($decorations{$decoration}));
+my $event_cooldown = defined($opts{'e'}) ? $opts{'e'} : 30;
+die $usage unless($event_cooldown =~ /^\d+$/);
+my $next_event = 0;
 
 my @random_objects = init_random_objects();
 
@@ -106,7 +113,8 @@ sub main {
 	while(1) {
 
 		add_environment($anim);
-		$decorations{$decoration}->($anim);
+		my $name = $decoration eq 'random' ? $sunken[int(rand(@sunken))] : $decoration;
+		$decorations{$name}->($anim);
 		add_all_seaweed($anim);
 		add_all_fish($anim);
 		random_object(undef, $anim);
@@ -1542,23 +1550,35 @@ yy
 
 sub init_random_objects {
 	return (
-		\&add_ship,
-		\&add_whale,
-		\&add_monster,
-		\&add_big_fish,
 		\&add_shark,
 		\&add_fishhook,
-		\&add_swan,
-		\&add_ducks,
+		\&add_ship,
 		\&add_dolphins,
+		\&add_big_fish,
+		\&add_ducks,
+		\&add_monster,
+		\&add_swan,
+		\&add_whale,
 	);
 }
 
-# add one of the random objects to the screen
+# events take turns in order. a new scene starts the next one right away;
+# when an event ends, the next one waits out the cooldown first
 sub random_object {
 	my ($dead_object, $anim) = @_;
-	my $sub = int(rand(scalar(@random_objects)));
-	$random_objects[$sub]->($dead_object, $anim);
+	if(!defined($dead_object) or $event_cooldown == 0) {
+		my $event = $random_objects[$next_event];
+		$next_event = ($next_event + 1) % @random_objects;
+		$event->(undef, $anim);
+		return;
+	}
+	# invisible placeholder whose death starts the next event
+	$anim->new_entity(
+		shape		=> ' ',
+		position	=> [ 0, 0, $depth{'guiText'} ],
+		die_time	=> time() + $event_cooldown,
+		death_cb	=> sub { random_object(undef, $_[1]) },
+	);
 }
 
 sub dprint {
