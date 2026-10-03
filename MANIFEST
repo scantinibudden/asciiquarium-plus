@@ -8,3 +8,4 @@ t/00-compile.t
 t/art.t
 t/cli.t
 t/config.t
+t/names.t

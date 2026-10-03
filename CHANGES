@@ -1,5 +1,9 @@
 Changes for Asciiquarium
 
+asciiquarium-plus 1.3.0 2026-10-02
+	- Every 4 seconds a new fish swims in named after a running
+	  Claude Code session, read from ~/.claude/sessions
+
 asciiquarium-plus 1.2.0 2026-09-29
 	- Optional config file (~/.config/asciiquarium-plus/config) for the
 	  default decoration and cooldown; anything invalid falls back to the

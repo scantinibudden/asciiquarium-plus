@@ -47,10 +47,12 @@ use Term::Animation::Entity;
 use Data::Dumper;
 use Curses;
 use Getopt::Std;
+use JSON::PP;
+use List::Util qw(shuffle);
 use strict;
 use warnings;
 
-my $version = "plus-1.2.0";
+my $version = "plus-1.3.0";
 
 my %opts;
 my %decorations = (
@@ -80,6 +82,10 @@ die $usage unless($decoration eq 'random' or exists($decorations{$decoration}));
 my $event_cooldown = defined($opts{'e'}) ? $opts{'e'} : $config{'cooldown'};
 die $usage unless($event_cooldown =~ /^\d+$/);
 my $next_event = 0;
+
+# every $name_interval seconds a new fish swims in named after a claude code session
+my $name_interval = 4;
+my @session_names;
 
 my @random_objects = init_random_objects();
 
@@ -133,6 +139,7 @@ sub main {
 		add_all_fish($anim);
 		$next_event = int(rand(@random_objects));	# each scene opens with a random event
 		random_object(undef, $anim);
+		name_fish(undef, $anim);
 		
 		$anim->redraw_screen();
 
@@ -691,6 +698,7 @@ q{
 		$fish_object->{'X'} = 1 - $fish_object->{'WIDTH'};
 	}
 	$anim->add_entity($fish_object);
+	return $fish_object;
 }
 
 sub fish_callback {
@@ -1594,6 +1602,51 @@ sub random_object {
 		die_time	=> time() + $event_cooldown,
 		death_cb	=> sub { random_object(undef, $_[1]) },
 	);
+}
+
+# sends in a new fish named after the next session, then schedules the next tag
+sub name_fish {
+	my (undef, $anim) = @_;
+	$anim->new_entity(
+		shape		=> ' ',
+		position	=> [ 0, 0, $depth{'guiText'} ],
+		die_time	=> time() + $name_interval,
+		death_cb	=> \&name_fish,
+	);
+	@session_names = shuffle(session_names()) unless(@session_names);
+	my $name = shift(@session_names);
+	return unless(defined($name));
+	# a new fish carries the name; it doesn't respawn, or the tank would keep growing
+	my $fish = add_fish(undef, $anim);
+	$fish->death_cb(undef);
+	$name = substr($name, 0, 24);
+	my $tag = $anim->new_entity(
+		type		=> 'name_tag',
+		shape		=> $name,
+		position	=> [ $fish->x, $fish->y - 1, $fish->z ],
+		follow_offset	=> [ int(($fish->width - length($name)) / 2), -1, 0 ],
+		default_color	=> 'WHITE',
+	);
+	# set after creation: Entity->new dies if given these (method call before bless)
+	$tag->follow_entity($fish);
+	$tag->die_entity($fish);
+}
+
+# names of the running claude code sessions; each one keeps ~/.claude/sessions/<pid>.json
+sub session_names {
+	my ($dir) = @_;
+	$dir //= ($ENV{'CLAUDE_CONFIG_DIR'} || ($ENV{'HOME'} || '') . '/.claude') . '/sessions';
+	my @names;
+	foreach my $file (glob("$dir/*.json")) {
+		open(my $fh, '<', $file) or next;
+		my $session = eval { decode_json(do { local $/; <$fh> }) };
+		close($fh);
+		next unless(ref($session) eq 'HASH' and $session->{'name'} and $session->{'pid'});
+		# files of crashed sessions linger; only keep the ones whose process is alive
+		next unless(kill(0, $session->{'pid'}) or $!{'EPERM'});
+		push(@names, $session->{'name'});
+	}
+	return @names;
 }
 
 # "key = value" lines; # starts a comment. the file is never written, and
